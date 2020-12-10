@@ -1,0 +1,31 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lab: <http://mtclan.net/rdfs/labtests/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+lab:CHOL a lab:Test ;
+    lab:fasting "อาหารอย่างน้อย 12 ชม."@th ;
+    lab:tests <http://mtclan.net/rdfs/analytes/chol> ;
+    foaf:name "Cholesterol Test" .
+
+lab:FBS a lab:Test ;
+    lab:fasting "อดอาหารอย่างน้อย 8 ชม."@th ;
+    lab:normalHi 9.9e+01 ;
+    lab:normalLow 7.2e+01 ;
+    lab:screenFor <http://purl.obolibrary.org/obo/DOID_9351> ;
+    lab:testWith lab:Blood ;
+    lab:tests <http://mtclan.net/rdfs/analytes/glucose> ;
+    foaf:name "Fasting Blood Sugar" .
+
+<http://mtclan.net/rdfs/analytes/chol> a <http://mtclan.net/rdfs/analytes/Analyte> ;
+    foaf:name "Cholesterol" .
+
+<http://mtclan.net/rdfs/analytes/glucose> rdfs:label "glucose"@en,
+        "น้ำตาล"@th ;
+    foaf:name "Blood Glucose" .
+
+lab:Blood a lab:Specimens ;
+    rdfs:label "เลือด"@th .
+
+<http://purl.obolibrary.org/obo/DOID_9351> rdfs:label "เบาหวาน"@th .
+

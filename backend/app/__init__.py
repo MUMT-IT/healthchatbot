@@ -1,8 +1,10 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
+from rdflib import Literal
 
 load_dotenv()
+DB_URI = Literal(os.environ.get('DATABASE_URI'))
 
 
 def create_app():
