@@ -1,0 +1,34 @@
+digraph G {
+    rankdir=LR;
+    fbs [label="name=Fasting blood sugar|@th:label=น้ำตาลหลังอดอาหาร|code=fbs|fasting=8 hours|normalLow=72.0|normalHigh=99.0|unit=mg/dl", shape="record"];
+    us [label="name=Urine sugar|@th:label=น้ำตาลในปัสสาวะ|code=us", shape="record"];
+    blood [label="Blood\n(specimens)|@th:label=เลือด", shape="record"];
+    urine [label="Urine\n(specimens)|@th:label=ปัสสาวะ", shape="record"];
+    bloodTest [label="Blood Test|@th:label=ตรวจเลือด", shape="record"];
+    glucose [label="Glucose", style="filled", color="orange"];
+    urineTest [label="Urine Test|@th:label=ตรวจปัสสาวะ", shape="record"];
+    bloodTest->blood [label="requires"];
+    urineTest->urine [label="requires"];
+    diabetes [label="Diabetes|@th:label=โรคเบาหวาน|startAgeRisk=45", shape="record"];
+    obesity [label="Obesity|@th:label=ความอ้วน", shape="record"];
+    fbs->blood [label="test with"];
+    food [label="food|@th:label=อาหาร", shape="record"]
+    coffee [label="coffee|@th:label=กาแฟ", shape="record"]
+    alcohol [label="alcohol|@th:label=แอลกอฮอล์", shape="record"]
+    period [label="menstruation|@th:label=ประจำเดือน", shape="record"]
+    fbs->food [label="interfered by", color="red"];
+    fbs->coffee [label="interfered by", color="red"];
+    fbs->alcohol [label="interfered by", color="red"];
+    fbs->diabetes [label="screens for", color="blue"];
+    us->diabetes [label="screens for", color="blue"];
+    obesity->diabetes [label="risks", color="red", style="dashed"];
+    us->period [label="interfered by", color="red"];
+    us->urine [label="test with"];
+    fbs->glucose [label="tests"];
+    us->glucose [label="tests"];
+    hyperglycemia [label="Hyperglycemia|@th:label=น้ำตาลในเลือดสูง", shape="record"];
+    hyperglycemia->diabetes [label="risks", style="dashed", color="red"];
+    fbs->hyperglycemia [label="screens for"];
+    hyperglycemiaCutoff [label="_BN|cutoff=100|test=fbs", shape="record"];
+    hyperglycemia->hyperglycemiaCutoff;
+}
