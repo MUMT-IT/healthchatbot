@@ -1,31 +1,170 @@
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix lab: <http://mtclan.net/rdfs/labtests/> .
+@prefix ns2: <http://mtclan.net/rdfs/riskfactors/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-lab:CHOL a lab:Test ;
-    lab:fasting "อาหารอย่างน้อย 12 ชม."@th ;
-    lab:tests <http://mtclan.net/rdfs/analytes/chol> ;
-    foaf:name "Cholesterol Test" .
+lab:BloodTest rdfs:label "ตรวจเลือด"@th ;
+    lab:requires lab:Blood .
 
-lab:FBS a lab:Test ;
+lab:POCTBS a lab:Test ;
+    rdfs:label "น้ำตาลปลายนิ้ว"@th ;
+    lab:code "dtx" ;
     lab:fasting "อดอาหารอย่างน้อย 8 ชม."@th ;
+    lab:interferedBy <http://mtclan.net/rdfs/interferance/coffee>,
+        <http://mtclan.net/rdfs/interferance/food>,
+        <http://mtclan.net/rdfs/interferance/sweetDrink> ;
     lab:normalHi 9.9e+01 ;
     lab:normalLow 7.2e+01 ;
     lab:screenFor <http://purl.obolibrary.org/obo/DOID_9351> ;
     lab:testWith lab:Blood ;
     lab:tests <http://mtclan.net/rdfs/analytes/glucose> ;
-    foaf:name "Fasting Blood Sugar" .
+    lab:unit "mg/dl" ;
+    foaf:name "Dextrostix" .
+
+lab:US a lab:Test ;
+    rdfs:label "น้ำตาลในปัสสาวะ"@th ;
+    lab:code "us" ;
+    lab:fasting "ไม่ต้องอดอาหาร"@th ;
+    lab:interferedBy <http://mtclan.net/rdfs/interferance/period> ;
+    lab:screenFor <http://purl.obolibrary.org/obo/DOID_9351> ;
+    lab:testWith lab:Urine ;
+    lab:tests <http://mtclan.net/rdfs/analytes/glucose> ;
+    foaf:name "Urine Sugar" .
+
+lab:UrineTest rdfs:label "ตรวจปัสสาวะ"@th ;
+    lab:requires lab:Urine .
+
+ns2:obesity a ns2:Factor ;
+    rdfs:label "โรคอ้วน"@th ;
+    ns2:causes <http://purl.obolibrary.org/obo/DOID_114>,
+        <http://purl.obolibrary.org/obo/DOID_9351> .
+
+ns2:pregnant a ns2:Factor ;
+    rdfs:label "ตั้งครรภ์"@th ;
+    ns2:causes <http://purl.obolibrary.org/obo/DOID_9351> .
+
+<http://purl.obolibrary.org/obo/DOID_4195> rdfs:label "น้ำตาลในเลือดสูง"@th ;
+    lab:indicatedBy [ lab:atest lab:FBS ;
+            lab:cutoff 1e+02 ;
+            lab:side "right" ] ;
+    ns2:causes <http://purl.obolibrary.org/obo/DOID_9351> .
+
+<http://purl.obolibrary.org/obo/NCIT_C34707> rdfs:label "ไขมันในเลือดสูง"@th ;
+    lab:indicatedBy [ lab:atest lab:CHOL ;
+            lab:cutoff 2e+02 ;
+            lab:side "right" ],
+        [ lab:atest lab:LDL ;
+            lab:cutoff 1.3e+02 ;
+            lab:side "right" ],
+        [ lab:atest lab:TG ;
+            lab:cutoff 1.5e+02 ;
+            lab:side "right" ] ;
+    ns2:causes <http://purl.obolibrary.org/obo/DOID_114> .
 
 <http://mtclan.net/rdfs/analytes/chol> a <http://mtclan.net/rdfs/analytes/Analyte> ;
+    rdfs:label "คอเลสเตอรอล"@th ;
     foaf:name "Cholesterol" .
+
+<http://mtclan.net/rdfs/analytes/ldl> a <http://mtclan.net/rdfs/analytes/Analyte> ;
+    rdfs:label "แอลดีแอลคอเลสเตอรอล"@th .
+
+<http://mtclan.net/rdfs/analytes/tg> a <http://mtclan.net/rdfs/analytes/Analyte> ;
+    rdfs:label "ไตรกลีเซอไรด์"@th .
+
+<http://mtclan.net/rdfs/interferance/period> a <http://mtclan.net/rdfs/interferance/Interferance> ;
+    rdfs:label "ประจำเดือน"@th .
+
+lab:CHOL a lab:Test ;
+    rdfs:label "คอเลสเตอรอล"@th ;
+    lab:code "cho" ;
+    lab:fasting "อดอาหารอย่างน้อย 12 ชม."@th ;
+    lab:interferedBy <http://mtclan.net/rdfs/interferance/alcohol>,
+        <http://mtclan.net/rdfs/interferance/coffee>,
+        <http://mtclan.net/rdfs/interferance/food>,
+        <http://mtclan.net/rdfs/interferance/sweetDrink> ;
+    lab:normalHi 200 ;
+    lab:normalLow 0 ;
+    lab:screenFor <http://purl.obolibrary.org/obo/DOID_114> ;
+    lab:testWith lab:Blood ;
+    lab:tests <http://mtclan.net/rdfs/analytes/chol> ;
+    lab:unit "mg/dl" ;
+    foaf:name "Cholesterol Test" .
+
+lab:FBS a lab:Test ;
+    rdfs:label "น้ำตาลในเลือดหลังอดอาหาร"@th ;
+    lab:code "fbs" ;
+    lab:fasting "อดอาหารอย่างน้อย 8 ชม."@th ;
+    lab:interferedBy <http://mtclan.net/rdfs/interferance/alcohol>,
+        <http://mtclan.net/rdfs/interferance/coffee>,
+        <http://mtclan.net/rdfs/interferance/food>,
+        <http://mtclan.net/rdfs/interferance/sweetDrink> ;
+    lab:normalHi 9.9e+01 ;
+    lab:normalLow 7.2e+01 ;
+    lab:screenFor <http://purl.obolibrary.org/obo/DOID_9351> ;
+    lab:testWith lab:Blood ;
+    lab:tests <http://mtclan.net/rdfs/analytes/glucose> ;
+    lab:unit "mg/dl" ;
+    foaf:name "Fasting Blood Sugar" .
+
+lab:LDL a lab:Test ;
+    rdfs:label "แอลดีแอลคอเลสเตอรอล"@th ;
+    lab:code "ldl" ;
+    lab:fasting "อดอาหารอย่างน้อย 12 ชม."@th ;
+    lab:interferedBy <http://mtclan.net/rdfs/interferance/alcohol>,
+        <http://mtclan.net/rdfs/interferance/coffee>,
+        <http://mtclan.net/rdfs/interferance/food>,
+        <http://mtclan.net/rdfs/interferance/sweetDrink> ;
+    lab:normalHi 1.29e+02 ;
+    lab:normalLow 1e+02 ;
+    lab:screenFor <http://purl.obolibrary.org/obo/DOID_114> ;
+    lab:testWith lab:Blood ;
+    lab:tests <http://mtclan.net/rdfs/analytes/ldl> ;
+    lab:unit "mg/dl" ;
+    foaf:name "LDL Cholesterol Test" .
+
+lab:TG a lab:Test ;
+    rdfs:label "ไตรกลีเซอไรด์"@th ;
+    lab:code "tg" ;
+    lab:fasting "อดอาหารอย่างน้อย 12 ชม."@th ;
+    lab:interferedBy <http://mtclan.net/rdfs/interferance/alcohol>,
+        <http://mtclan.net/rdfs/interferance/coffee>,
+        <http://mtclan.net/rdfs/interferance/food>,
+        <http://mtclan.net/rdfs/interferance/sweetDrink> ;
+    lab:normalHi 1.5e+02 ;
+    lab:normalLow 0e+00 ;
+    lab:screenFor <http://purl.obolibrary.org/obo/DOID_114> ;
+    lab:testWith lab:Blood ;
+    lab:tests <http://mtclan.net/rdfs/analytes/tg> ;
+    lab:unit "mg/dl" ;
+    foaf:name "Triglyceride Test" .
+
+lab:Urine a lab:Specimens ;
+    rdfs:label "ปัสสาวะ"@th .
 
 <http://mtclan.net/rdfs/analytes/glucose> rdfs:label "glucose"@en,
         "น้ำตาล"@th ;
     foaf:name "Blood Glucose" .
 
+<http://mtclan.net/rdfs/interferance/alcohol> a <http://mtclan.net/rdfs/interferance/Interferance> ;
+    rdfs:label "แอลกอฮอล์"@th .
+
+<http://mtclan.net/rdfs/interferance/coffee> a <http://mtclan.net/rdfs/interferance/Interferance> ;
+    rdfs:label "Coffee"@en,
+        "กาแฟ"@th .
+
+<http://mtclan.net/rdfs/interferance/food> a <http://mtclan.net/rdfs/interferance/Interferance> ;
+    rdfs:label "อาหาร"@th .
+
+<http://mtclan.net/rdfs/interferance/sweetDrink> a <http://mtclan.net/rdfs/interferance/Interferance> ;
+    rdfs:label "เครื่องดื่มหวาน"@th .
+
+<http://purl.obolibrary.org/obo/DOID_114> rdfs:label "โรคหัวใจ"@th ;
+    lab:startRiskAge 35 .
+
 lab:Blood a lab:Specimens ;
     rdfs:label "เลือด"@th .
 
-<http://purl.obolibrary.org/obo/DOID_9351> rdfs:label "เบาหวาน"@th .
+<http://purl.obolibrary.org/obo/DOID_9351> rdfs:label "โรคเบาหวาน"@th ;
+    lab:startRiskAge 45 .
 
