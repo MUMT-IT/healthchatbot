@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from rdflib import Literal
 
 load_dotenv()
-DB_URI = Literal(os.environ.get('DATABASE_URI'))
+DB_URI = Literal(os.environ.get('DATABASE_URL'))
 
 
 def create_app():
