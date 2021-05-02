@@ -1,6 +1,12 @@
 import os
+from json import loads
+
 from flask import request, abort, make_response, jsonify
+from linebot.models import ButtonsTemplate, MessageAction, FlexSendMessage, CarouselContainer, BoxComponent, \
+    BubbleContainer, TextComponent, ButtonComponent
+
 from . import bot_bp as bot
+from .models import UnfulfilledMessage
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import InvalidSignatureError
 from wsgi import app
@@ -8,8 +14,11 @@ from rdflib_sqlalchemy import registerplugins
 from rdflib.store import Store
 from rdflib import URIRef, Graph, plugin, Namespace, FOAF, RDFS, Literal
 from rdflib.plugins.sparql import prepareQuery
-from app import DB_URI
+from app import DB_URI, db
+from pytz import timezone
+from datetime import datetime
 
+bkk = timezone('Asia/Bangkok')
 line_bot_api = LineBotApi(app.config.get('LINE_MESSAGE_API_ACCESS_TOKEN'))
 handler = WebhookHandler(app.config.get('LINE_MESSAGE_API_CLIENT_SECRET'))
 
@@ -25,6 +34,7 @@ ns2 = Namespace('http://mtclan.net/rdfs/riskfactors/')
 
 FEMALE_ENDING = 'ค่ะ'
 
+
 def join_and(alist, sep=',', conj='และ'):
     text = ''
     for i in range(len(alist)):
@@ -36,10 +46,12 @@ def join_and(alist, sep=',', conj='และ'):
             text += conj
     return text
 
+
 def insert_and(items):
     if len(items) > 1:
         items.insert(-1, 'และ')
     return items
+
 
 @bot.route('/message')
 def send_message():
@@ -67,8 +79,8 @@ def test_info(testname):
                       '?analyte foaf:name ?analname .'
                       '?atest lab:tests ?analyte .'
                       '?atest lab:fasting ?fastinfo .}'),
-        initNs={'foaf': FOAF, 'lab': labn}
-    )
+                     initNs={'foaf': FOAF, 'lab': labn}
+                     )
     test = labn[testname.upper()]
     data = []
     for row in graph.query(q, initBindings={'atest': test}):
@@ -92,6 +104,7 @@ def test_info(testname):
         })
     data[0]['specimens'] = specimens
     return jsonify(data)
+
 
 @bot.route('/message/callback', methods=['POST'])
 def line_message_callback():
@@ -167,7 +180,7 @@ def get_test_info_from_code(req):
             specimens.append(row.label)
         t['specimens'] = specimens
     for t in data:
-        message += '{} ({}) เป็นการตรวจ{} ใน{}'\
+        message += '{} ({}) เป็นการตรวจ{} ใน{}' \
             .format(t['testname'], t['tcode'], t['analname'], ' '.join(t['specimens']))
     message += ' ต้องการทราบรายละเอียดเกี่ยวกับเตรียมตัวก่อนการตรวจไหมคะ'
     return message
@@ -189,11 +202,42 @@ def get_tests_for_concern(req):
     for row in graph.query(q, initBindings={'disease': diseases}):
         print(row.testname)
         tests.append({
-            'name': row.testname + " ({})".format(row.tcode)
+            'name': row.testname,
+            'code': row.tcode
         })
     instruction = 'กรุณาพิมพ์รหัสในวงเล็บสำหรับรายละเอียดของรายการตรวจ'
     message = 'ควรตรวจ {} {}'.format(join_and([t['name'] for t in tests], sep=" "), instruction)
-    return message
+    bubbles = []
+    for t in tests:
+        bubbles.append(
+            BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        TextComponent(
+                            text=u'{}'.format(t['name']),
+                            weight='bold',
+                            size='xl',
+                            gravity='center',
+                            align='center',
+                        )
+                    ]
+                ),
+                footer=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        ButtonComponent(
+                            action=MessageAction(
+                                label='detail',
+                                text=u'{}'.format(t['code'])
+                            )
+                        )
+                    ]
+                )
+            )
+        )
+
+    return bubbles
 
 
 def get_risk_disease_by_age(req):
@@ -257,11 +301,13 @@ def get_disease_from_risk_factor(req):
         'FILTER (LANG(?disname) = "th")'
         '}'
     ), initNs={'rdfs': RDFS, 'ns2': ns2})
-    message = 'คุณมีความเสี่ยงต่อโรค'
     diseases = []
+    message = ''
     for row in graph.query(q, initBindings={'?factorname': factor}):
         diseases.append(row.disname)
-    message += join_and(diseases, sep=' ')
+    if diseases:
+        message = 'คุณมีความเสี่ยงต่อโรค'
+        message += join_and(diseases, sep=' ')
     return message
 
 
@@ -375,17 +421,31 @@ def get_lab_result_interpretation(req):
 @bot.route('/dialogflow/webhook', methods=['POST'])
 def dialogflow_webhook():
     req = request.get_json(force=True)
+    intent = req["queryResult"]["intent"]["displayName"]
+    text = req['originalDetectIntentRequest']['payload']['data']['message']['text']
+    reply_token = req['originalDetectIntentRequest']['payload']['data']['replyToken']
+    id = req['originalDetectIntentRequest']['payload']['data']['source']['userId']
+
+    print('id = ' + id)
+    print('text = ' + text)
+    print('intent = ' + intent)
+    print('reply_token = ' + reply_token)
     # fetch action from json
     action = req.get('queryResult').get('action')
     rsp_message = {'fulfillmentText': 'ขออภัยเราไม่สามารถให้ข้อมูลได้ค่ะ'}
     message = ''
-    print(action)
     if action == 'get_test_info':
         message = get_test_info_from_code(req)
     if action == 'get_self_prep_from_test':
         message = get_self_prep_from_test_code(req)
     if action == 'get_tests_for_concern':
         message = get_tests_for_concern(req)
+        if message:
+            return line_bot_api.reply_message(reply_token=reply_token,
+                                              messages=FlexSendMessage(
+                                                  alt_text='Recommended Tests',
+                                                  contents=CarouselContainer(contents=message)
+                                              ))
     if action == 'get_risk_disease_by_age':
         message = get_risk_disease_by_age(req)
     if action == 'self-preparation':
@@ -400,4 +460,12 @@ def dialogflow_webhook():
         if not message.endswith('คะ'):
             message += FEMALE_ENDING
         rsp_message['fulfillmentText'] = message
+    else:
+        rsp_message['fulfillmentText'] = u'ขออภัยค่ะระบบยังไม่สามารถให้ข้อมูลนี้ได้'
+        unfulfilled_msg = UnfulfilledMessage(
+            message=text,
+            created_at=bkk.localize(datetime.now())
+        )
+        db.session.add(unfulfilled_msg)
+        db.session.commit()
     return make_response(jsonify(rsp_message))
