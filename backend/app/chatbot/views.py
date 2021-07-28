@@ -462,16 +462,13 @@ def dialogflow_webhook():
             message += FEMALE_ENDING
         rsp_message['fulfillmentText'] = message
     '''
-    if action == 'input.unknown':
-        rsp_message['fulfillmentText'] = u'ขออภัยค่ะระบบยังไม่สามารถให้ข้อมูลนี้ได้'
-        unfulfilled_msg = UnfulfilledMessage(
-            line_id=id,
-            message=text,
-            action=action,
-            created_at=bkk.localize(datetime.now())
-        )
-        db.session.add(unfulfilled_msg)
-        db.session.commit()
-    else:
-        rsp_message['fulfillmentText'] = u'ขอบคุณที่สอบถามค่ะ'
+    unfulfilled_msg = UnfulfilledMessage(
+        line_id=id,
+        message=text,
+        action=action,
+        created_at=bkk.localize(datetime.now())
+    )
+    db.session.add(unfulfilled_msg)
+    db.session.commit()
+    rsp_message['fulfillmentText'] = u'ขอบคุณที่สอบถามค่ะ'
     return make_response(jsonify(rsp_message))
