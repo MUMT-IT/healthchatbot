@@ -467,6 +467,7 @@ def dialogflow_webhook():
         unfulfilled_msg = UnfulfilledMessage(
             line_id=id,
             message=text,
+            action=action,
             created_at=bkk.localize(datetime.now())
         )
         db.session.add(unfulfilled_msg)
