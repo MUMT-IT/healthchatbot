@@ -464,11 +464,15 @@ def dialogflow_webhook():
     '''
     unfulfilled_msg = UnfulfilledMessage(
         line_id=id,
-        message=text,
+        message=text.lower(),
         action=action,
         created_at=bkk.localize(datetime.now())
     )
     db.session.add(unfulfilled_msg)
     db.session.commit()
-    rsp_message['fulfillmentText'] = u'ขอบคุณที่สอบถามค่ะ'
+    if action == 'user-group':
+        if text.lower() in ['a', 'b']:
+            rsp_message['fulfillmentText'] = u'ขอบคุณที่ระบุกลุ่มผู้ใช้ค่ะ'
+    else:
+        rsp_message['fulfillmentText'] = u'ขอบคุณที่สอบถามค่ะ'
     return make_response(jsonify(rsp_message))
