@@ -1,4 +1,5 @@
-from app import db
+from extensions import db
+
 
 class UnfulfilledMessage(db.Model):
     __tablename__ = 'unfulfilled_messages'

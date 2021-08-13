@@ -1,15 +1,14 @@
 import os
-from json import loads
 
 from flask import request, abort, make_response, jsonify
-from linebot.models import ButtonsTemplate, MessageAction, FlexSendMessage, CarouselContainer, BoxComponent, \
-    BubbleContainer, TextComponent, ButtonComponent
+from linebot.models import (MessageAction, BoxComponent,
+                            BubbleContainer, TextComponent,
+                            ButtonComponent)
 
 from . import bot_bp as bot
 from .models import UnfulfilledMessage
 from linebot import (LineBotApi, WebhookHandler)
 from linebot.exceptions import InvalidSignatureError
-from wsgi import app
 from rdflib_sqlalchemy import registerplugins
 from rdflib.store import Store
 from rdflib import URIRef, Graph, plugin, Namespace, FOAF, RDFS, Literal
@@ -19,8 +18,8 @@ from pytz import timezone
 from datetime import datetime
 
 bkk = timezone('Asia/Bangkok')
-line_bot_api = LineBotApi(app.config.get('LINE_MESSAGE_API_ACCESS_TOKEN'))
-handler = WebhookHandler(app.config.get('LINE_MESSAGE_API_CLIENT_SECRET'))
+line_bot_api = LineBotApi(os.environ.get('LINE_MESSAGE_API_ACCESS_TOKEN'))
+handler = WebhookHandler(os.environ.get('LINE_MESSAGE_API_CLIENT_SECRET'))
 
 registerplugins()
 
