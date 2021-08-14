@@ -72,3 +72,27 @@ class ReportSubTopicResource(Resource):
             tp.topic = _tp.topic
             tp.save()
         return subtopic_schema.dump(tp), HTTPStatus.OK
+
+
+complaint_schema = ComplaintReportSchema()
+complaint_list_schema = ComplaintReportSchema(many=True)
+
+
+class ComplaintReportListResource(Resource):
+    def get(self):
+        data = ComplaintReport.query.all()
+        return complaint_list_schema.dump(data), HTTPStatus.OK
+
+    def post(self):
+        json_data = request.get_json()
+        try:
+            comp = complaint_schema.load(data=json_data, partial=('creator',
+                                                                  'created_at',
+                                                                  'subject',
+                                                                  'comment'))
+        except marshmallow.ValidationError:
+            return {'message': 'Validation Error'}, HTTPStatus.BAD_REQUEST
+        else:
+            comp.save()
+
+        return complaint_schema.dump(comp), HTTPStatus.CREATED

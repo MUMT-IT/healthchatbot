@@ -28,6 +28,7 @@ class SubTopicReport(db.Model):
         db.session.add(self)
         db.session.commit()
 
+
 class ComplaintReport(db.Model):
     __tablename__ = 'report_complaints'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

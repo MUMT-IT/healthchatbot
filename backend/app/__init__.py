@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from rdflib import Literal
 from extensions import *
 from .student_reports.resources.reports import ReportTopicResource, ReportTopicListResource, ReportSubTopicListResource, \
-    ReportSubTopicResource
+    ReportSubTopicResource, ComplaintReportListResource
 
 load_dotenv()
 DB_URI = Literal(os.environ.get('DATABASE_URL'))
@@ -25,6 +25,7 @@ def register_resources(app):
     api.add_resource(ReportTopicResource, '/topics/<int:topic_id>')
     api.add_resource(ReportSubTopicListResource, '/subtopics')
     api.add_resource(ReportSubTopicResource, '/subtopics/<int:subtopic_id>')
+    api.add_resource(ComplaintReportListResource, '/complaints')
     api.init_app(app)
 
 
