@@ -1,4 +1,6 @@
 import marshmallow
+from extensions import mail
+from flask_mail import Message
 from pytz import timezone
 from flask import request
 from flask_restful import Resource
@@ -14,6 +16,11 @@ topic_schema_list = ReportTopicSchema(many=True)
 
 subtopic_schema = ReportSubTopicSchema()
 subtopic_schema_list = ReportSubTopicSchema(many=True)
+
+
+def send_mail(recp, title, body):
+    message = Message(subject=title, body=body, recipients=recp)
+    mail.send(message)
 
 
 class ReportTopicListResource(Resource):
@@ -99,5 +106,14 @@ class ComplaintReportListResource(Resource):
         else:
             comp.created_at = localtz.localize(datetime.now())
             comp.save()
+            body = (f"ข้อร้องเรียนเมื่อวันที่ {comp.created_at.astimezone(localtz).strftime('%d/%m/%Y %H:%M:%S')}"
+                    f"\nเรื่องหลัก: {comp.topic.topic}"
+                    f"\nเรื่องย่อย: {comp.subtopic.topic}"
+                    f"\nรายวิชา (สำหรับเรื่องเรียน): {comp.subject}"
+                    f"\nรายละเอียด: {comp.description}"
+                    f"\nหมายเหตุ: {comp.comment}"
+                    f"\nแจ้งโดย: {comp.creator}"
+                    )
+            send_mail(['likit.pre@mahidol.edu'], 'เรื่องร้องเรียนใหม่', body)
 
         return complaint_schema.dump(comp), HTTPStatus.CREATED
