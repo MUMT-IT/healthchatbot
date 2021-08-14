@@ -1,9 +1,13 @@
 import marshmallow
+from pytz import timezone
 from flask import request
 from flask_restful import Resource
 from ..schemas.reports import *
 from ..models.reports import *
 from http import HTTPStatus
+from datetime import datetime
+
+localtz = timezone('Asia/Bangkok')
 
 topic_schema = ReportTopicSchema()
 topic_schema_list = ReportTopicSchema(many=True)
@@ -93,6 +97,7 @@ class ComplaintReportListResource(Resource):
         except marshmallow.ValidationError:
             return {'message': 'Validation Error'}, HTTPStatus.BAD_REQUEST
         else:
+            comp.created_at = localtz.localize(datetime.now())
             comp.save()
 
         return complaint_schema.dump(comp), HTTPStatus.CREATED

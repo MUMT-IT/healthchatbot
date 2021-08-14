@@ -34,6 +34,7 @@ class ComplaintReportSchema(ma.SQLAlchemySchema):
     subject = ma.auto_field()
     comment = ma.auto_field()
     creator = ma.auto_field()
+    created_at = ma.auto_field()
 
     @post_load
     def make_complaint(self, data, **kwargs):
