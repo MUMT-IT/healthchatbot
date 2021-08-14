@@ -10,6 +10,10 @@ class TopicReport(db.Model):
     def get_by_id(cls, topic_id):
         return cls.query.get(topic_id)
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
 
 class SubTopicReport(db.Model):
     __tablename__ = 'report_subtopics'
@@ -20,6 +24,9 @@ class SubTopicReport(db.Model):
     def get_by_id(cls, topic_id):
         return cls.query.get(topic_id)
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 class ComplaintReport(db.Model):
     __tablename__ = 'report_complaints'
