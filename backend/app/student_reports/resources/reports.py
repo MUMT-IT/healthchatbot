@@ -114,6 +114,7 @@ class ComplaintReportListResource(Resource):
                     f"\nหมายเหตุ: {comp.comment}"
                     f"\nแจ้งโดย: {comp.creator}"
                     )
-            send_mail(['likit.pre@mahidol.edu'], 'เรื่องร้องเรียนใหม่', body)
+            send_mail(['likit.pre@mahidol.edu', 'sineewanlaya.wic@mahidol.ac.th'],
+                      'เรื่องร้องเรียนใหม่', body)
 
         return complaint_schema.dump(comp), HTTPStatus.CREATED
