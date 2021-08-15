@@ -431,7 +431,7 @@ def dialogflow_webhook():
     # print('reply_token = ' + reply_token)
     # fetch action from json
     action = req.get('queryResult').get('action')
-    rsp_message = {'fulfillmentText': 'เรายังไม่สามารถให้ข้อมูลในประเด็นนี้ได้ค่ะ'}
+    rsp_message = {'fulfillmentText': f'{action}: เรายังไม่สามารถให้ข้อมูลในประเด็นนี้ได้ค่ะ'}
     message = ''
     if action == 'get_test_info':
         message = get_test_info_from_code(req)
@@ -468,6 +468,6 @@ def dialogflow_webhook():
     if message:
         if not message.endswith('คะ'):
             message += FEMALE_ENDING
-        rsp_message['fulfillmentText'] = message
+        rsp_message['fulfillmentText'] = f'{action}: {message}'
 
     return make_response(jsonify(rsp_message))
