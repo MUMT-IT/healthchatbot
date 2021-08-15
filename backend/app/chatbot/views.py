@@ -3,7 +3,7 @@ import os
 from flask import request, abort, make_response, jsonify
 from linebot.models import (MessageAction, BoxComponent,
                             BubbleContainer, TextComponent,
-                            ButtonComponent)
+                            ButtonComponent, FlexSendMessage, CarouselContainer)
 
 from . import bot_bp as bot
 from .models import UnfulfilledMessage
@@ -425,20 +425,19 @@ def dialogflow_webhook():
     reply_token = req['originalDetectIntentRequest']['payload']['data']['replyToken']
     id = req['originalDetectIntentRequest']['payload']['data']['source']['userId']
 
-    print('id = ' + id)
-    print('text = ' + text)
-    print('intent = ' + intent)
-    print('reply_token = ' + reply_token)
+    # print('id = ' + id)
+    # print('text = ' + text)
+    # print('intent = ' + intent)
+    # print('reply_token = ' + reply_token)
     # fetch action from json
     action = req.get('queryResult').get('action')
-    rsp_message = {'fulfillmentText': 'ขออภัยเราไม่สามารถให้ข้อมูลได้ค่ะ'}
-    '''
+    rsp_message = {'fulfillmentText': 'เรายังไม่สามารถให้ข้อมูลในประเด็นนี้ได้ค่ะ'}
     message = ''
     if action == 'get_test_info':
         message = get_test_info_from_code(req)
-    if action == 'get_self_prep_from_test':
+    elif action == 'get_self_prep_from_test':
         message = get_self_prep_from_test_code(req)
-    if action == 'get_tests_for_concern':
+    elif action == 'get_tests_for_concern':
         message = get_tests_for_concern(req)
         if message:
             return line_bot_api.reply_message(reply_token=reply_token,
@@ -446,32 +445,28 @@ def dialogflow_webhook():
                                                   alt_text='Recommended Tests',
                                                   contents=CarouselContainer(contents=message)
                                               ))
-    if action == 'get_risk_disease_by_age':
+    elif action == 'get_risk_disease_by_age':
         message = get_risk_disease_by_age(req)
-    if action == 'self-preparation':
+    elif action == 'self-preparation':
         message = get_self_preparation(req)
-    if action == 'get_disease_from_risk_factor':
+    elif action == 'get_disease_from_risk_factor':
         message = get_disease_from_risk_factor(req)
-    if action == 'get_reference_value':
+    elif action == 'get_reference_value':
         message = get_reference_value(req)
-    if action == 'get_lab_result_interpretation':
+    elif action == 'get_lab_result_interpretation':
         message = get_lab_result_interpretation(req)
-    if message:
+    elif message:
         if not message.endswith('คะ'):
             message += FEMALE_ENDING
         rsp_message['fulfillmentText'] = message
-    '''
-    unfulfilled_msg = UnfulfilledMessage(
-        line_id=id,
-        message=text.lower(),
-        action=action,
-        created_at=bkk.localize(datetime.now())
-    )
-    db.session.add(unfulfilled_msg)
-    db.session.commit()
-    if action == 'user-group':
-        if text.lower() in ['a', 'b']:
-            rsp_message['fulfillmentText'] = u'ขอบคุณที่ระบุกลุ่มผู้ใช้ค่ะ'
     else:
-        rsp_message['fulfillmentText'] = u'ขอบคุณที่สอบถามค่ะ'
+        unfulfilled_msg = UnfulfilledMessage(
+            line_id=id,
+            message=text.lower(),
+            action=action,
+            created_at=bkk.localize(datetime.now())
+        )
+        db.session.add(unfulfilled_msg)
+        db.session.commit()
+
     return make_response(jsonify(rsp_message))
