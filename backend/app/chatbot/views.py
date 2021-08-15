@@ -455,10 +455,6 @@ def dialogflow_webhook():
         message = get_reference_value(req)
     elif action == 'get_lab_result_interpretation':
         message = get_lab_result_interpretation(req)
-    elif message:
-        if not message.endswith('คะ'):
-            message += FEMALE_ENDING
-        rsp_message['fulfillmentText'] = message
     else:
         unfulfilled_msg = UnfulfilledMessage(
             line_id=id,
@@ -468,5 +464,10 @@ def dialogflow_webhook():
         )
         db.session.add(unfulfilled_msg)
         db.session.commit()
+
+    if message:
+        if not message.endswith('คะ'):
+            message += FEMALE_ENDING
+        rsp_message['fulfillmentText'] = message
 
     return make_response(jsonify(rsp_message))
